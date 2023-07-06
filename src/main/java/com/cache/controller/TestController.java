@@ -19,8 +19,8 @@ public class TestController {
 	private CacheManager cacheManager;
 
 	@GetMapping("/allContent")
-	public Object fetchAllContent() {
-		return testService.fetchAllContent();
+	public void fetchAllContent() {
+		testService.fetchAllContent();
 	}
 
 	@GetMapping("/getData")

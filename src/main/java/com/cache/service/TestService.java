@@ -1,6 +1,7 @@
 package com.cache.service;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,8 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +22,16 @@ public class TestService {
 	@Autowired
 	private CacheManager cacheManager;
 
-	public Object fetchAllContent() {
-		log.info("{}", cacheManager instanceof ConcurrentMapCacheManager);
-		return cacheManager.getCacheNames().stream()
-				.collect(Collectors.toMap(x -> x.toUpperCase(), x -> cacheManager.getCache(x)));
+	public void fetchAllContent() {
+		log.info("{}", cacheManager instanceof CaffeineCacheManager);
+		for (String cacheName : cacheManager.getCacheNames()) {
+			CaffeineCache caffeineCache = (CaffeineCache) cacheManager.getCache(cacheName);
+			com.github.benmanes.caffeine.cache.Cache<Object, Object> nativeCache = caffeineCache.getNativeCache();
+			for (Map.Entry<Object, Object> entry : nativeCache.asMap().entrySet()) {
+				System.err.println("Key = " + entry.getKey());
+				System.err.println("Value = " + entry.getValue());
+			}
+		}
 	}
 
 	@Cacheable("c1")
@@ -38,7 +46,6 @@ public class TestService {
 			}
 		};
 	}
-	
 
 	@Cacheable("c2")
 	public HashMap<Object, Object> fetchDataFromDownStream() {
@@ -63,7 +70,7 @@ public class TestService {
 			}
 		};
 	}
-	
+
 	@CachePut("c1")
 	public HashMap<Object, Object> fetchDataFromDBAlways() {
 		log.info("fetchDataFromDBAlways() invoked --------------------");
