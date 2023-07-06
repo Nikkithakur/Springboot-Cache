@@ -41,7 +41,7 @@ public class TestController {
 	
 	@GetMapping("/refreshCache")
 	public void refreshCache() {
-		cacheManager.getCache("c1").clear();
+		cacheManager.getCache("Countries").clear();
 		testService.fetchDataFromDB();
 		
 	}

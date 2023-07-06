@@ -24,21 +24,19 @@ public class CacheConfig {
 		return cacheMngr;
 	}
 
-	@Bean
-	public Caffeine<Object, Object> caffeine() {
-		return Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10);
-	}
-
 	@Bean("caffeineManager")
 	@Primary
-	public CacheManager cacheManager(Caffeine<Object, Object> caffeine) {
+	public CacheManager cacheManager() {
 		CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
-		caffeineCacheManager.setCaffeine(caffeine);
-		caffeineCacheManager.setCacheNames(List.of("c1", "c2", "c3"));
-		caffeineCacheManager.setAllowNullValues(true);
+		caffeineCacheManager.registerCustomCache("Countries",
+				Caffeine.newBuilder().expireAfterAccess(10, TimeUnit.SECONDS).recordStats().build());
+		caffeineCacheManager.registerCustomCache("States",
+				Caffeine.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).recordStats().build());
+		caffeineCacheManager.registerCustomCache("Technologies",
+				Caffeine.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES).recordStats().build());
 		return caffeineCacheManager;
 	}
-	
+
 	@Bean
 	public ObjectMapper objectMapper() {
 		ObjectMapper objMapper = new ObjectMapper();
